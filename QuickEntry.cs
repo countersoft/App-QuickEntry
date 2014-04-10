@@ -41,8 +41,8 @@ namespace QuickEntry
         {
             QuickEntryModel model = new QuickEntryModel();
 
-            var viewableProjects = ProjectManager.GetAppViewableProjects(this);
-            model.ProjectList = new SelectList(viewableProjects, "Entity.Id", "Entity.Name");
+            var projects = ProjectManager.GetAppCreateableProjects(this);
+            model.ProjectList = new SelectList(projects, "Entity.Id", "Entity.Name");
 
             return new WidgetResult() { Success = true, Markup = new WidgetMarkup("Views/QuickEntry.cshtml", model) };
         }
@@ -50,6 +50,10 @@ namespace QuickEntry
         [AppUrl("createissues")]
         public ActionResult CreateIssues(string items, int projectId)
         {
+            var projects = ProjectManager.GetAppCreateableProjects(this);
+
+            if (!projects.Any(p => p.Entity.Id == projectId)) return JsonError("Project not found");
+
             var issueItems = items.FromJson<List<Item>>();
 
             if (issueItems == null || issueItems.Count == 0) return JsonError("No Items");

@@ -40,11 +40,9 @@
         </div>
 
         <h3 class="margin-bottom-10 margin-top-20">Items</h3>
-        <div id="items" class="nestedSortable">
-          
-        </div>
+        <div id="items" class="nestedSortable"></div>
 
     <div>
-        <input type="button" name="createItems" id="createItems" value="Add" class="button-primary" />
+        <input type="button" name="createItems" id="createItems" value="Add" class="button-primary" @if (Model.ProjectList.Count() == 0) {<text>disabled="disabled"</text>}/>
     </div>
 </div>
