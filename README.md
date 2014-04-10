@@ -1,4 +1,4 @@
-App-RapidEntry
+App-QuickEntry
 ==============
 
-Rapid entry of Gemini items including hierarchy
+Quick entry of Gemini items including hierarchy
