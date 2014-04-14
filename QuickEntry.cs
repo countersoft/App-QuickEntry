@@ -30,7 +30,7 @@ namespace QuickEntry
     AppAuthor("Countersoft"), AppKey("QuickEntry"),
     AppName("Quick Entry"),
     AppDescription("QuickEntry"),
-    AppControlUrl("view"), AppRequiresCreatePermission(true)]
+    AppControlUrl("view"), AppRequiresCreatePermission(false), AppRequiresViewPermission(true)]
     public class QuickEntryController : BaseAppController
     {
         public override WidgetResult Caption(IssueDto issue = null)
@@ -76,7 +76,7 @@ namespace QuickEntry
   
             int currentProjectId = selectedProjects.Count > 0 ? selectedProjects.First() : 0;
 
-            var projects = ProjectManager.GetAppCreateableProjects(this);
+            var projects = ProjectManager.GetAppViewableProjects(this);
 
             if (!projects.Any(s => s.Entity.Id == currentProjectId))
             {
@@ -91,7 +91,7 @@ namespace QuickEntry
         [AppUrl("createissues")]
         public ActionResult CreateIssues(string items, int projectId)
         {
-            var projects = ProjectManager.GetAppCreateableProjects(this);
+            var projects = ProjectManager.GetAppViewableProjects(this);
 
             if (!projects.Any(p => p.Entity.Id == projectId)) return JsonError("Project not found");
 
