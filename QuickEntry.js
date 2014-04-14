@@ -29,6 +29,11 @@
                 };
 
                 $('#QuickEntry .sortable').nestedSortable(QuickEntry.options);
+
+                $('#QuickEntry #Projects').change(function () {
+                    QuickEntry.updateAppNavCard();
+                });
+
                 QuickEntry.generate($('#QuickEntry #items'));
 
                 $('#QuickEntry #createItems').click(function () {
@@ -275,6 +280,10 @@
                     children: children
                 };
                 return ret;
+            },
+            updateAppNavCard: function()
+            {
+                gemini_appnav.pageCard.Options['341532F1-55C4-4399-9458-9DD37B8D4237'] = JSON.stringify({ projectId: $('#Projects').val() });
             }
         };
         

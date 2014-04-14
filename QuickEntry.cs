@@ -20,6 +20,7 @@ using Countersoft.Foundation.Commons.Enums;
 using Countersoft.Gemini.Commons.Entity.Security;
 using Countersoft.Gemini.Commons.Meta;
 using Countersoft.Gemini;
+using Countersoft.Gemini.Infrastructure.Managers;
 
 namespace QuickEntry
 {
@@ -41,8 +42,48 @@ namespace QuickEntry
         {
             QuickEntryModel model = new QuickEntryModel();
 
+            HttpSessionManager HttpSessionManager = new HttpSessionManager();
+
+            IssuesGridFilter tmp = new IssuesGridFilter();
+            var selectedProjects = new List<int>();
+
+            try
+            {
+                if (CurrentCard.IsNew)
+                {
+                    tmp = new IssuesGridFilter(HttpSessionManager.GetFilter(CurrentCard.Id, CurrentCard.Filter));
+
+                    if (tmp == null)
+                    {
+                        tmp = CurrentCard.Options[AppGuid].FromJson<IssuesGridFilter>();
+                    }
+
+                    selectedProjects = tmp.GetProjects(); 
+                }
+                else
+                {
+                    var cardOptions = CurrentCard.Options[AppGuid].FromJson<QuickEntryWorkspaceModel>();
+
+                    selectedProjects.Add(cardOptions.projectId);
+                }
+            }
+            catch (Exception ex)
+            {
+                tmp = new IssuesGridFilter(HttpSessionManager.GetFilter(CurrentCard.Id, IssuesFilter.CreateProjectFilter(UserContext.User.Entity.Id, UserContext.Project.Entity.Id)));
+
+                selectedProjects = tmp.GetProjects();
+            }
+  
+            int currentProjectId = selectedProjects.Count > 0 ? selectedProjects.First() : 0;
+
             var projects = ProjectManager.GetAppCreateableProjects(this);
-            model.ProjectList = new SelectList(projects, "Entity.Id", "Entity.Name");
+
+            if (!projects.Any(s => s.Entity.Id == currentProjectId))
+            {
+                currentProjectId = projects.Count > 0 ? projects.First().Entity.Id : 0;
+            }
+
+            model.ProjectList = new SelectList(projects, "Entity.Id", "Entity.Name", currentProjectId);
 
             return new WidgetResult() { Success = true, Markup = new WidgetMarkup("Views/QuickEntry.cshtml", model) };
         }

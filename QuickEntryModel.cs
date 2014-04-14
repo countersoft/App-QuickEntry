@@ -12,6 +12,11 @@ namespace QuickEntry
         public IEnumerable<SelectListItem> ProjectList { get; set; }
     }
 
+    public class QuickEntryWorkspaceModel
+    {
+        public int projectId { get; set; }
+    }
+
     public class Item
     {
         public string text { get; set; }
