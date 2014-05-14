@@ -38,6 +38,13 @@
 
                 $('#QuickEntry #createItems').click(function () {
 
+                    if ($('#QuickEntry .limTextContainer input').val() != '')
+                    {
+                        var keyEvent = jQuery.Event("keydown");
+                        keyEvent.keyCode = 13;
+                        $('#QuickEntry .limTextContainer input').trigger(keyEvent);
+                    }
+
                     var data = QuickEntry.data();
 
                     if (data.length >= 2 || data[0].children.length > 0)
@@ -228,7 +235,9 @@
             },
             keyDown: function (e, node)
             {
-                switch (e.which)
+                var keyCode = e.which != null ? e.which : e.keyCode;
+
+                switch (keyCode)
                 {
                     case 13:
                         if (QuickEntry.convertTextbox(node))
