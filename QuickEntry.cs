@@ -31,6 +31,7 @@ namespace QuickEntry
     AppName("Quick Entry"),
     AppDescription("QuickEntry"),
     AppControlUrl("view"), AppRequiresCreatePermission(false), AppRequiresViewPermission(true)]
+    [OutputCache(Duration = 0, NoStore = false, Location = OutputCacheLocation.None)]
     public class QuickEntryController : BaseAppController
     {
         public override WidgetResult Caption(IssueDto issue = null)
