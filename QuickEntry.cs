@@ -114,8 +114,12 @@ namespace QuickEntry
 
         private void CreateIssue(Item item, int? parentId)
         {
-            var issue = new Issue { Title = item.text, ParentIssueId = parentId, ProjectId = CurrentProject.Entity.Id };
-
+            var issue = new Issue { ProjectId = CurrentProject.Entity.Id };
+            var issueDto = IssueManager.SetDefaultValues(new IssueDto() { Entity = issue }, null);
+            issue.Title = item.text;
+            issue.ParentIssueId = parentId;
+            var customFields = issueDto.CustomFields;
+            issue = issueDto.Entity;
             if (string.IsNullOrWhiteSpace(issue.Title))
             {
                 if (item.children.Any())
@@ -125,9 +129,41 @@ namespace QuickEntry
                     return;
                 }
             }
+            var newDto = IssueManager.Convert(issue);
+            foreach (var custom in customFields)
+            {
+                var cf = newDto.CustomFields.Find(c => c.Entity.CustomFieldId == custom.Entity.CustomFieldId);
+                if (cf == null)
+                {
+                    newDto.CustomFields.Add(cf);
+                }
+                else
+                {
+                    cf.Entity = custom.Entity;
+                    cf.FormattedData = custom.FormattedData;
+                }
+            }
+            newDto.Entity = GeminiEventDispatcher.Instance.BeforeIssueCreatedDispatcher(UserContext, newDto.Entity, newDto.Entity);
+            newDto = GeminiEventDispatcher.Instance.BeforeIssueCreatedDispatcher(UserContext, newDto);
+            issue = newDto.Entity;
+            customFields = newDto.CustomFields;
+            var newIssue = IssueManager.Create(issue, false);
+            if (customFields.Count > 0)
+            {
+                var customFieldManager = new CustomFieldManager(IssueManager);
+                foreach (var customField in customFields)
+                {
+                    customField.Entity.IssueId = issueDto.Entity.Id;
+                    customField.Entity.ProjectId = issueDto.Entity.ProjectId;
+                    customField.Entity.UserId = issueDto.Entity.ReportedBy;
 
-            var newIssue = IssueManager.Create(issue);
-
+                    customFieldManager.Update(customField.Entity);
+                }
+                IssueManager.RemoveFromCache(issueDto.Entity.Id);
+                issueDto = IssueManager.Get(issueDto.Entity.Id);
+            }
+            GeminiEventDispatcher.Instance.AfterIssueCreatedDispatcher(UserContext, issueDto);
+            
             UserManager.AddIssueAction(newIssue);
 
             foreach (var child in item.children)
